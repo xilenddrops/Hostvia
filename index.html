@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8"/>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <meta
+    name="description"
+    content="Convert AI prompts into structured JSON for AI image and video generation."
+  />
+
+  <title>AI Prompt JSON Converter</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial,sans-serif;
+    }
+
+    body{
+      background:#0f172a;
+      color:white;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      padding:20px;
+    }
+
+    .container{
+      width:100%;
+      max-width:700px;
+      background:#1e293b;
+      padding:25px;
+      border-radius:15px;
+      box-shadow:0 0 20px rgba(0,0,0,0.3);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:20px;
+      color:#38bdf8;
+    }
+
+    textarea{
+      width:100%;
+      height:150px;
+      background:#0f172a;
+      border:1px solid #334155;
+      color:white;
+      padding:15px;
+      border-radius:10px;
+      resize:none;
+      font-size:16px;
+    }
+
+    button{
+      width:100%;
+      margin-top:15px;
+      padding:14px;
+      border:none;
+      border-radius:10px;
+      background:#38bdf8;
+      color:black;
+      font-weight:bold;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    pre{
+      margin-top:20px;
+      background:#0f172a;
+      padding:15px;
+      border-radius:10px;
+      border:1px solid #334155;
+      white-space:pre-wrap;
+      word-wrap:break-word;
+    }
+
+    .agreement{
+      margin-top:12px;
+      font-size:13px;
+      color:#94a3b8;
+      text-align:center;
+      line-height:1.6;
+    }
+
+    .agreement a{
+      color:#38bdf8;
+      text-decoration:none;
+      font-weight:bold;
+    }
+
+    .links{
+      margin-top:20px;
+      text-align:center;
+      font-size:14px;
+    }
+
+    .links a{
+      color:#38bdf8;
+      text-decoration:none;
+      margin:0 5px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>AI Prompt JSON Converter</h1>
+
+    <textarea
+      id="promptInput"
+      placeholder="Paste AI prompt here..."
+    ></textarea>
+
+    <button onclick="generateJSON()">
+      Generate JSON
+    </button>
+
+    <button onclick="copyJSON()">
+      Copy JSON
+    </button>
+
+    <p class="agreement">
+
+      By using this website, you agree to our
+
+      <a
+        href="#"
+        onclick="showTerms()"
+      >
+        Terms of Use
+      </a>
+
+      and
+
+      <a
+        href="#"
+        onclick="showPrivacy()"
+      >
+        Privacy Policy
+      </a>.
+
+    </p>
+
+    <pre id="output">
+JSON output will appear here...
+    </pre>
+
+    <div class="links">
+
+      <a
+        href="https://www.instagram.com/mr_silent_drops?igsh=ZWY3dW5tMm9zejRm"
+        target="_blank"
+      >
+        Contact Us
+      </a>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    let latestJSON = "";
+
+    async function generateJSON(){
+
+      const prompt =
+        document.getElementById("promptInput").value;
+
+      const output =
+        document.getElementById("output");
+
+      if(!prompt.trim()){
+
+        output.textContent =
+          "Please enter a prompt.";
+
+        return;
+      }
+
+      output.textContent =
+        "Generating...";
+
+      try{
+
+        const response = await fetch(
+
+          "https://ai-prompt-6yye.onrender.com/generate",
+
+          {
+            method:"POST",
+
+            headers:{
+              "Content-Type":
+                "application/json"
+            },
+
+            body:JSON.stringify({
+              prompt:prompt
+            })
+          }
+        );
+
+        const data =
+          await response.json();
+
+        if(data.error){
+
+          output.textContent =
+            "Backend Error:\n\n" +
+            data.error;
+
+          return;
+        }
+
+        if(!data.choices){
+
+          output.textContent =
+            JSON.stringify(data, null, 2);
+
+          return;
+        }
+
+        const result =
+          data.choices[0].message.content;
+
+        latestJSON = result;
+
+        output.textContent =
+          result;
+
+      }catch(error){
+
+        output.textContent =
+          "Frontend Error:\n\n" +
+          error.message;
+      }
+    }
+
+    async function copyJSON(){
+
+      if(!latestJSON){
+
+        alert("Generate JSON first.");
+
+        return;
+      }
+
+      try{
+
+        await navigator.clipboard.writeText(
+          latestJSON
+        );
+
+        alert("JSON copied.");
+
+      }catch(err){
+
+        alert("Copy failed.");
+      }
+    }
+
+    function showTerms(){
+
+      alert(
+
+`Terms of Use
+
+This website is provided for educational and testing purposes.
+
+Users are responsible for the prompts and content they generate.
+
+AI-generated results may be inaccurate or unexpected.
+
+Do not use the service for illegal, harmful, or abusive activities.
+
+The service may change, become unavailable, or stop at any time.`
+
+      );
+
+    }
+
+    function showPrivacy(){
+
+      alert(
+
+`Privacy Policy
+
+This website may temporarily process user prompts to generate AI responses.
+
+We do not intentionally store personal information.
+
+User input may be sent to third-party AI services for processing.
+
+Do not submit sensitive or private information.
+
+This service is provided for educational and testing purposes.`
+
+      );
+
+    }
+
+  </script>
+
+</body>
+</html>
